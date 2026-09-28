@@ -28,6 +28,7 @@ from utils.cif_data_validator import CIFDataValidator
 from utils.data_name_validator import DataNameValidator, FieldCategory
 from utils.cif_format_converter import CIFFormatConverter
 from utils.field_rules_validator import FieldRulesValidator
+from utils.cif_duplicate_checker import filter_conflicts,detail_conflicts
 
 MINIMUM_PYTHON = (3, 11)
 
@@ -75,6 +76,7 @@ def check_content(
     check_data_names: bool = True,
     check_data_values: bool = True,
     check_links: bool = False,
+    check_duplicates_and_aliases:bool=True,
     syntax_version: str = "auto",
 ) -> Dict:
     """Run the requested checks against CIF content; return a plain-dict report.
@@ -164,6 +166,23 @@ def check_content(
                     "value": issue.value,
                     "expected": issue.expected,
                 })
+    if check_duplicates_and_aliases:
+            lines = content.splitlines()
+            conflicts = dict_manager.detect_field_aliases_in_cif(content)
+            filtered_conflicts = filter_conflicts(conflicts,content,lines)
+            detailed_conflicts = detail_conflicts(filtered_conflicts,lines,dict_manager)
+            for canonical,details in detailed_conflicts.items():
+                print(details)
+                report["issues"].append({
+                    "source": "duplicate_checking",
+                    "severity": "warning",
+                    "issue_type": "Duplicate entry",
+                    "line": [detail['line_num'] for detail in details],
+                    "field": canonical,
+                    "message": "There are duplicated/aliased entries for this data field  present as field names " + ' , '.join([detail['alias'] for detail in details]) + " on lines " + ' , '.join(str(detail['line_num']) for detail in details)
+                })
+
+
 
     report["issues"].sort(key=lambda i: (i.get("line") is None, i.get("line") or 0))
     report["error_count"] = sum(1 for i in report["issues"] if i["severity"] == "error")
@@ -255,6 +274,7 @@ def cmd_check(args: argparse.Namespace) -> int:
             check_data_names=not args.no_data_names,
             check_data_values=not args.no_data_values,
             check_links=args.check_links,
+            check_duplicates_and_aliases= not args.no_duplicates,
             syntax_version=args.syntax_version,
         )
         report["file"] = path
@@ -398,6 +418,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-data-names", action="store_true", help="Skip data-name (dictionary/deprecation) checks.")
     check_parser.add_argument(
         "--no-data-values", action="store_true", help="Skip data-value (type/enum/loop) checks.")
+    check_parser.add_argument(
+        "--no-duplicates", action="store_true", help="Skip duplicate checks.")
     check_parser.add_argument(
         "--check-links", action="store_true",
         help="Also run the opt-in DDL1 parent/child relational check.")
