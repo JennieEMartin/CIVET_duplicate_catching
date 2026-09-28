@@ -1,5 +1,6 @@
 from utils.CIF_parser import iter_structural_lines
-def is_in_deprecated_section(content,line_num):
+
+def is_in_deprecated_section(content:str, line_num:int) -> bool:
         """Check if a line is within a deprecated section of the CIF file."""
         lines = content.splitlines()
 
@@ -35,7 +36,14 @@ def is_in_deprecated_section(content,line_num):
 
         return False
 
-def filter_conflicts(conflicts,content,lines):
+def filter_conflicts(conflicts:dict ,content:str ,lines: list[str]) -> dict:
+    """ Filters a list of potential conflicts (i.e a dictionary of field_names and their possible aliases) to identify
+        duplicated or aliased fields that are actually present in the cif file
+
+        Returns:
+        filtered_conflicts: dict - 
+                           Dictionary of actual conflicts, with field names as keys, and present duplciates or aliases 
+                           of those field names as values"""
     filtered_conflicts={}
     for canonical, alias_list in conflicts.items():
                 # Check if this conflict involves fields that are in both main and deprecated sections
@@ -77,26 +85,34 @@ def filter_conflicts(conflicts,content,lines):
     conflicts = filtered_conflicts
     return conflicts
 
-def detail_conflicts(conflicts,lines,dict_manager):
+def detail_conflicts(conflicts:dict, lines:list[str], dict_manager:class) -> dict:
+    """ Takes a dictionary of conflicts (i.e a dictionary of field_names and their present duplicates/aliases) and gathers useful
+        information for reporting the issue - such as line numbers and the values seen in each case
+
+        Returns:
+        detailed_conflicts: dict -
+                           Dictionary of conflicts, with field names as keys, and values being dictionaries, containing important 
+                           details for error reporting"""
+
     detailed_conflicts = {}
     for canonical, alias_list in conflicts.items():
-                detailed_conflicts[canonical] = []
-                for alias in set(alias_list):
-                    # Find line number and value for this alias
-                    for idx, line in iter_structural_lines(lines):
-                        line_num = idx + 1
-                        line_stripped = line.strip()
-                        if line_stripped.startswith(alias + ' ') or line_stripped.startswith(alias + '\t'):
-                            # Extract value
-                            parts = line_stripped.split(None, 1)
-                            value = parts[1] if len(parts) > 1 else ''
+        detailed_conflicts[canonical] = []
+        for alias in set(alias_list):
+            # Find line number and value for this alias
+            for idx, line in iter_structural_lines(lines):
+                line_num = idx + 1
+                line_stripped = line.strip()
+                if line_stripped.startswith(alias + ' ') or line_stripped.startswith(alias + '\t'):
+                    # Extract value
+                    parts = line_stripped.split(None, 1)
+                    value = parts[1] if len(parts) > 1 else ''
                             
-                            detailed_conflicts[canonical].append({
-                                'line_num': line_num,
-                                'alias': alias,
-                                'value': value,
-                                'is_deprecated': dict_manager.is_field_deprecated(alias)
-                            })
+                    detailed_conflicts[canonical].append({
+                      'line_num': line_num,
+                      'alias': alias,
+                      'value': value,
+                      'is_deprecated': dict_manager.is_field_deprecated(alias)
+                       })
                 # Sort found duplicate entries by line number
-                detailed_conflicts[canonical]=sorted(detailed_conflicts[canonical],key=lambda k : k['line_num'])
+        detailed_conflicts[canonical]=sorted(detailed_conflicts[canonical],key=lambda k : k['line_num'])
     return detailed_conflicts
