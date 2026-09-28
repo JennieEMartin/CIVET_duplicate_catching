@@ -172,7 +172,6 @@ def check_content(
             filtered_conflicts = filter_conflicts(conflicts,content,lines)
             detailed_conflicts = detail_conflicts(filtered_conflicts,lines,dict_manager)
             for canonical,details in detailed_conflicts.items():
-                print(details)
                 report["issues"].append({
                     "source": "duplicate_checking",
                     "severity": "warning",
