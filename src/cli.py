@@ -179,7 +179,7 @@ def check_content(
                     "issue_type": "Duplicate entry",
                     "line": [detail['line_num'] for detail in details],
                     "field": canonical,
-                    "message": "There are duplicated/aliased entries for this data field  present as field names " + ' , '.join([detail['alias'] for detail in details]) + ' with values '+' , '.join([detail['value'] for detail in details]) + " on lines " + ' , '.join(str(detail['line_num']) for detail in details)
+                    "message": f"There are duplicated/aliased entries for this data field  present as field names {' , '.join([detail['alias'] for detail in details])} with values {' , '.join([detail['value'] for detail in details])} on lines {' , '.join([str(detail['line_num']) for detail in details])}"
                 })
 
 

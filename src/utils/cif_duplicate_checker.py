@@ -36,7 +36,7 @@ def is_in_deprecated_section(content:str, line_num:int) -> bool:
 
         return False
 
-def filter_conflicts(conflicts:dict ,content:str ,lines: list[str]) -> dict:
+def filter_conflicts(conflicts:dict[str,str] ,content:str ,lines: list[str]) -> dict[str,str]:
     """ Filters a list of potential conflicts (i.e a dictionary of field_names and their possible aliases) to identify
         duplicated or aliased fields that are actually present in the cif file
 
@@ -85,7 +85,7 @@ def filter_conflicts(conflicts:dict ,content:str ,lines: list[str]) -> dict:
     conflicts = filtered_conflicts
     return conflicts
 
-def detail_conflicts(conflicts:dict, lines:list[str], dict_manager:class) -> dict:
+def detail_conflicts(conflicts:dict[str,str], lines:list[str], dict_manager:"DictManager") -> dict[str,dict[str or int or bool]]:
     """ Takes a dictionary of conflicts (i.e a dictionary of field_names and their present duplicates/aliases) and gathers useful
         information for reporting the issue - such as line numbers and the values seen in each case
 
