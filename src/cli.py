@@ -176,7 +176,7 @@ def check_content(
                     "source": "duplicate_checking",
                     "severity": "warning",
                     "issue_type": "Duplicate entry",
-                    "line": [detail['line_num'] for detail in details],
+                    "line":min([detail['line_num'] for detail in details]),
                     "field": canonical,
                     "message": (f"There are duplicated/aliased entries for this data field  present as field names " 
                                 f"{' , '.join([detail['alias'] for detail in details])} with values "
