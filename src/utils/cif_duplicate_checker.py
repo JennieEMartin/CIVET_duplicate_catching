@@ -37,12 +37,12 @@ def is_in_deprecated_section(content:str, line_num:int) -> bool:
         return False
 
 def filter_conflicts(conflicts:dict[str,str] ,content:str ,lines: list[str]) -> dict[str,str]:
-    """ Filters a list of potential conflicts (i.e a dictionary of field_names and their possible aliases) to identify
-        duplicated or aliased fields that are actually present in the cif file
+    """ Filters a list of conflicts (i.e a dictionary of field_names and their prsent aliases) to identify
+        duplicated or aliased fields that are actually present in the non deperecated section of the cif file
 
         Returns:
         filtered_conflicts: dict - 
-                           Dictionary of actual conflicts, with field names as keys, and present duplciates or aliases 
+                           Dictionary of conflicts, with field names as keys, and present duplciates or aliases 
                            of those field names as values"""
     filtered_conflicts={}
     for canonical, alias_list in conflicts.items():

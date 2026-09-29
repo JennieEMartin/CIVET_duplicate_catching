@@ -1893,6 +1893,7 @@ class FieldCheckingMixin:
             # Filter conflicts to exclude those between main section and deprecated section
             lines = content.splitlines()
             conflicts=filter_conflicts(conflicts,content,lines)
+
             # If no conflicts and no deprecated fields found - all good!
             if not conflicts and not deprecated_fields:
                 return True

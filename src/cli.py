@@ -178,10 +178,11 @@ def check_content(
                     "issue_type": "Duplicate entry",
                     "line": [detail['line_num'] for detail in details],
                     "field": canonical,
-                    "message": f"There are duplicated/aliased entries for this data field  present as field names {' , '.join([detail['alias'] for detail in details])} with values {' , '.join([detail['value'] for detail in details])} on lines {' , '.join([str(detail['line_num']) for detail in details])}"
+                    "message": (f"There are duplicated/aliased entries for this data field  present as field names " 
+                                f"{' , '.join([detail['alias'] for detail in details])} with values "
+                                f"{' , '.join([detail['value'] for detail in details])} on lines " 
+                                f"{' , '.join([str(detail['line_num']) for detail in details])}")
                 })
-
-
 
     report["issues"].sort(key=lambda i: (i.get("line") is None, i.get("line") or 0))
     report["error_count"] = sum(1 for i in report["issues"] if i["severity"] == "error")
