@@ -18,6 +18,7 @@ rather than through the ``civet`` command line.
 import argparse
 import json
 import sys
+import logging
 from io import TextIOWrapper
 from typing import Dict, List, Optional
 
@@ -31,7 +32,7 @@ from utils.field_rules_validator import FieldRulesValidator
 from utils.cif_duplicate_checker import filter_conflicts,detail_conflicts
 
 MINIMUM_PYTHON = (3, 11)
-
+logging.basicConfig(level=logging.WARNING)
 # Data-name categories severe enough to report from `check`. VALID,
 # REGISTERED_LOCAL, and USER_ALLOWED are not issues, so they're omitted.
 _NAME_ISSUE_SEVERITY = {
@@ -135,7 +136,7 @@ def check_content(
                     "field": result.field_name,
                     "message": result.description or category.value,
                 })
-
+                
     if check_data_values or check_links:
         parser = CIFParser()
         parser.parse_file(content)
@@ -167,6 +168,9 @@ def check_content(
                     "expected": issue.expected,
                 })
     if check_duplicates_and_aliases:
+            logging.warning("Duplicate testing can't identify duplicates where one entry is mistyped. " 
+                         "If other problems are identified, checks should be re-run" 
+                         " after fixing to test for all duplicates") 
             lines = content.splitlines()
             conflicts = dict_manager.detect_field_aliases_in_cif(content)
             filtered_conflicts = filter_conflicts(conflicts,content,lines)
